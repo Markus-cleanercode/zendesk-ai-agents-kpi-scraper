@@ -4,8 +4,13 @@
   "description": "tbd",
   "main": "index.js",
   "author": "CleanerCode/Markus",
-  "license": "no license",
+  "type": "module",
+  "license": "UNLICENSED",
   "dependencies": {
-    "playwright": "^1.57.0"
+    "playwright": "^1.57.0",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/readline-sync": "^1.4.8"
   }
 }
