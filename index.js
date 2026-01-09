@@ -55,7 +55,10 @@ async function savePage(page, filename) {
 
     const twoFactorCode = question("2FA Code: ");
     await page.fill("input", twoFactorCode);
-    await page.screenshot({ path: "2fa_entered.png", fullPage: true });
+    await page.screenshot({
+        path: "screenshots/2fa_entered.png",
+        fullPage: true,
+    });
 
     await page.getByRole("button", { name: "Verify" }).click();
     await page.waitForTimeout(1000);
@@ -65,7 +68,10 @@ async function savePage(page, filename) {
     await page.waitForTimeout(500);
 
     await savePage(page, "after_2fa.png");
-    await page.screenshot({ path: "after_2fa.png", fullPage: true });
+    await page.screenshot({
+        path: "screenshots/after_2fa.png",
+        fullPage: true,
+    });
 
     // 4. Navigate to the AI Agents page
     await page.goto(gotoAIAgentsURL);
@@ -76,7 +82,10 @@ async function savePage(page, filename) {
     await page.waitForTimeout(500);
 
     await savePage(page, "ai_agents_page.png");
-    await page.screenshot({ path: "ai_agents_page.png", fullPage: true });
+    await page.screenshot({
+        path: "screenshots/ai_agents_page.png",
+        fullPage: true,
+    });
 
     // 4. Navigate to the Conversation Logs page
     await page.goto(testURL);
@@ -88,7 +97,7 @@ async function savePage(page, filename) {
 
     await savePage(page, "conversation_logs_page.png");
     await page.screenshot({
-        path: "conversation_logs_page.png",
+        path: "screenshots/conversation_logs_page.png",
         fullPage: true,
     });
 
