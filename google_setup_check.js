@@ -3,39 +3,46 @@ import { google } from "googleapis";
 // 1. CONFIGURATION
 const SPREADSHEET_ID = "1Me4RqtMvlnovO-l8EGlMWU7SzR2eCd9_loJYJZaQkHI";
 const KEY_FILE_PATH = "credentials.json"; // Your downloaded JSON key
-const RANGE = "Usecases!A1"; // The tab name and cell
 
-async function writeToSheet() {
+async function writeBatch() {
     try {
-        // 2. AUTHENTICATION
         const auth = new google.auth.GoogleAuth({
             keyFile: KEY_FILE_PATH,
             scopes: ["https://www.googleapis.com/auth/spreadsheets"],
         });
 
         const client = await auth.getClient();
-
-        // 3. CREATE SHEETS INSTANCE
         const googleSheets = google.sheets({ version: "v4", auth: client });
 
-        // 4. WRITE DATA
+        // CONSTRUCT THE BATCH REQUEST
         const request = {
             spreadsheetId: SPREADSHEET_ID,
-            range: RANGE,
-            valueInputOption: "USER_ENTERED", // Parses data as if user typed it (numbers, dates, etc.)
             resource: {
-                values: [
-                    ["Hello World"], // Rows are arrays of columns
+                valueInputOption: "USER_ENTERED", // Defined once for the whole batch
+                data: [
+                    {
+                        range: "Usecases!A1",
+                        values: [["Hello"]],
+                    },
+                    {
+                        range: "Usecases!C5", // Different cell, or even different Sheet/Tab
+                        values: [["World"]],
+                    },
                 ],
             },
         };
 
-        const response = await googleSheets.spreadsheets.values.update(request);
+        // NOTE: Method is now 'values.batchUpdate'
+        const response = await googleSheets.spreadsheets.values.batchUpdate(
+            request,
+        );
 
-        console.log(`Success! Updated cells: ${response.data.updatedCells}`);
+        console.log(
+            `Success! Total cells updated: ${response.data.totalUpdatedCells}`,
+        );
     } catch (error) {
-        console.error("Error writing to sheet:", error.message);
+        console.error("Error executing batch update:", error.message);
     }
 }
 
-writeToSheet();
+writeBatch();
