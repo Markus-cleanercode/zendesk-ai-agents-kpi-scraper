@@ -1,0 +1,9 @@
+{
+    "id": "juskys",
+    "username_env_variable_name": "JUSKYS_USERNAME",
+    "password_env_variable_name": "JUSKYS_PASSWORD",
+    "subdomain": "juskys",
+    "spreadsheet_id": "15F3ok6kcK34FYJGh3Pua31kyy1t0LrmTbph08FAggGg",
+    "sheet_name": "KPIs",
+    "dates_begin_at_row": 97
+}
