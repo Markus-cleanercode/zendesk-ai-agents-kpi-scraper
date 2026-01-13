@@ -13,6 +13,10 @@ async function screenshotPage(page, filename) {
     await page.screenshot({ path: `screenshots/${filename}.png` });
 }
 
+function getLoginURL(subdomain) {
+    return `https://${subdomain}.zendesk.com/auth`;
+}
+
 function getSupportURL(subdomain) {
     return `https://${subdomain}.zendesk.com/agent`;
 }
@@ -22,14 +26,13 @@ function getGotoAIAgentsURL(subdomain) {
 }
 
 async function loadSession(config, page) {
-    // Load cookies if they exist
     const filename = `./cache/cookies_${config.id}.json`;
-    if (fs.existsSync(filename)) {
-        const cookiesString = fs.readFileSync(filename, "utf-8");
-        const cookies = JSON.parse(cookiesString);
-        await page.context().addCookies(cookies);
-        console.log(`Loaded cookies from '${filename}'`);
-    }
+    if (!fs.existsSync(filename)) return;
+
+    const cookiesString = fs.readFileSync(filename, "utf-8");
+    const cookies = JSON.parse(cookiesString);
+    await page.context().addCookies(cookies);
+    console.log(`Loaded cookies from '${filename}'`);
 }
 
 async function saveSession(config, page) {
@@ -48,11 +51,12 @@ async function waitForRedirectsAndLoad(page, extraWaitTime = 0) {
 async function isLoggedIn(page, config) {
     await page.goto(getSupportURL(config["subdomain"]));
     await waitForRedirectsAndLoad(page);
-    return await isLoginPage(page, config);
+    await screenshotPage(page, "page_for_login_check");
+    return !(await isLoginPage(page, config));
 }
 
 async function isLoginPage(page, config) {
-    return await page.url().startsWith(getSupportURL(config["subdomain"]));
+    return await page.url().startsWith(getLoginURL(config["subdomain"]));
 }
 
 async function login(config, page) {
@@ -71,12 +75,16 @@ async function login(config, page) {
     await screenshotPage(page, "after_credentials");
     await savePage(page, "after_credentials.html");
 
-    const twoFactorCode = question("2FA Code: ");
-    await page.fill("input", twoFactorCode);
-    await page.getByRole("button", { name: "Verify" }).click();
+    if (await isLoginPage(page, config)) {
+        console.log("2FA required.");
 
-    await waitForRedirectsAndLoad(page);
-    await screenshotPage(page, "after_2fa");
+        const twoFactorCode = question("2FA Code: ");
+        await page.fill("input", twoFactorCode);
+        await page.getByRole("button", { name: "Verify" }).click();
+
+        await waitForRedirectsAndLoad(page);
+        await screenshotPage(page, "after_2fa");
+    }
 
     await page.goto(getGotoAIAgentsURL(config["subdomain"]));
     await waitForRedirectsAndLoad(page, 2000);
