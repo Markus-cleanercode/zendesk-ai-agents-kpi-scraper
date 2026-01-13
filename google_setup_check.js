@@ -29,28 +29,35 @@ async function writeBatch() {
     try {
         const googleSheets = await createClient();
 
-        // CONSTRUCT THE BATCH REQUEST
-        const request = {
-            spreadsheetId: SPREADSHEET_ID,
-            resource: {
-                valueInputOption: "USER_ENTERED", // Defined once for the whole batch
-                data: [
-                    {
-                        range: "Usecases!A1",
-                        values: [["Hello"]],
-                    },
-                    {
-                        range: "Usecases!C5", // Different cell, or even different Sheet/Tab
-                        values: [["World"]],
-                    },
-                ],
-            },
-        };
+        const hyperlinkFormula =
+            '=HYPERLINK("https://www.google.com"; "Go to Google")';
 
         // NOTE: Method is now 'values.batchUpdate'
-        const response = await googleSheets.spreadsheets.values.batchUpdate(
-            request,
-        );
+        const response = await googleSheets.spreadsheets.batchUpdate({
+            spreadsheetId: SPREADSHEET_ID,
+            requestBody: {
+                requests: [{
+                    repeatCell: {
+                        range: {
+                            sheetId: 2060006328,
+                            startColumnIndex: 0,
+                            endColumnIndex: 1,
+                            startRowIndex: 0,
+                            endRowIndex: 1,
+                        },
+                        cell: {
+                            userEnteredValue: {
+                                formulaValue: hyperlinkFormula,
+                            },
+                            userEnteredFormat: {
+                                hyperlinkDisplayType: "LINKED",
+                            },
+                        },
+                        fields: "userEnteredValue,userEnteredFormat",
+                    },
+                }],
+            },
+        });
 
         console.log(
             `Success! Total cells updated: ${response.data.totalUpdatedCells}`,
@@ -60,4 +67,4 @@ async function writeBatch() {
     }
 }
 
-readTable();
+writeBatch();
